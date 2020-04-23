@@ -16,7 +16,7 @@ int line, pos;
 
 void calcDecimal(char* x);
 void calcASCII(char* x);
-void calcNL_comment(char* x);
+int calcNL_comment(char* x);
 
 %}
 
@@ -31,7 +31,7 @@ INTEGER		[1-9][0-9]*|0|0[0-7]+|0[xX][A-Fa-f0-9]+
 REAL		[0-9]+\.[0-9]+|[0-9]+\.[0-9]+[eE](\+|\-)?[0-9]+
 CHAR		\'\\[abfnrtv0\\\'\"\?]\'|\'[^\\\'\"]\'
 STRING		\"([^\\\'\"]|[abfnrtv0\\\'\"\?])*\"
-COMMENT		(\/\/(([^\n])*)\n)
+COMMENT		(\/\/(([^\n])*)\n)|\/\*([^\*]|\*+[^\*\/])*\*+\/\n
 OPERATOR	\+(\+|=)?|\-(\-|=)?|\*(=)?|\/(=)?|%(=)?|!(=)?|(<|>|=)?=|<|>|&&|\|\||,
 PUNC		\(|\)|\{|\}|\[|\]|;|:|\.
 ERROR		.
@@ -79,6 +79,9 @@ int main(int argc, char *argv[]){
 				pos += strlen(yytext);
 				break;
 			case (TCOMMENT):
+				printf("%-15s:%19s,%3d,%3d\n", yytext, tokenType[tn-1], line, pos);
+				line += calcNL_comment(yytext);
+				break;
 			case (TKEYWORD):
 			case (TIDENTIFIER):
 			case (TSTRING):
@@ -166,9 +169,18 @@ void calcASCII(char* x) {
 	return;
 }
 
-void calcNL_comment(char* x) {
-	for (int i = 0; i < sizeof(x); i++) {
-		if (x[i] == '\n')
-			line++;
+int calcNL_comment(char* x) {
+	int lines = 0;
+	int tmp = 0;
+	if (x[1] != '*') {
+		while (x[tmp] != '\0') {
+			if (x[tmp] == '\n') {
+				lines++;
+			}
+			tmp++;
+		}
+		return lines;
 	}
+	pos = 1;
+	return 1;
 }
