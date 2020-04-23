@@ -80,7 +80,17 @@ int main(int argc, char *argv[]){
 				break;
 			case (TCOMMENT):
 				printf("%-15s:%19s,%3d,%3d\n", yytext, tokenType[tn-1], line, pos);
-				line += calcNL_comment(yytext);
+				// line += calcNL_comment(yytext);
+				int lines = 0;
+				int tmp = 0;
+				while (yytext[tmp] != '\0') {
+					if (yytext[tmp] == '\n') {
+						lines++;
+						pos = 1;
+					}
+					tmp++;
+				}
+				line += lines;
 				break;
 			case (TKEYWORD):
 			case (TIDENTIFIER):
@@ -170,17 +180,17 @@ void calcASCII(char* x) {
 }
 
 int calcNL_comment(char* x) {
-	int lines = 0;
-	int tmp = 0;
-	if (x[1] != '*') {
-		while (x[tmp] != '\0') {
-			if (x[tmp] == '\n') {
-				lines++;
-			}
-			tmp++;
-		}
-		return lines;
-	}
-	pos = 1;
-	return 1;
+	// int lines = 0;
+	// int tmp = 0;
+	// if (x[1] != '*') {
+	// 	while (x[tmp] != '\0') {
+	// 		if (x[tmp] == '\n') {
+	// 			lines++;
+	// 		}
+	// 		tmp++;
+	// 	}
+	// 	return lines;
+	// }
+	// pos = 1;
+	// return 1;
 }
