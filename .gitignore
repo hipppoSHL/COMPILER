@@ -1,0 +1,9 @@
+.cache/
+.gnupg/
+.vscode-server/
+.exer/
+.bash_history
+.bash_logout
+.bashrc
+.profile
+.wget-hsts
