@@ -15,3 +15,7 @@ int main(void){
 }
 
 // this is a comment
+/*
+dkdkdk
+*/
+

@@ -22,7 +22,7 @@ int calcNL_comment(char* x);
 
 NEWLINE		\n
 TAB			\t
-BLANK		[ \t]+
+BLANK		[ \t]
 KEYWORD		break|case|char|default|else|float|for|if|int|return|switch|void|while|int|float|double|char|void
 ID			{LETTER_}({LETTER_}|{DIGIT})*
 DIGIT		[0-9]
@@ -39,6 +39,7 @@ ERROR		.
 %%
 {COMMENT}	{return TCOMMENT;}
 {NEWLINE}	{line++; pos = 1;}
+{TAB}		{pos++;}
 {BLANK}		{pos++;}
 {KEYWORD}	{return TKEYWORD;}
 {ID}		{return TIDENTIFIER;}
@@ -80,7 +81,6 @@ int main(int argc, char *argv[]){
 				break;
 			case (TCOMMENT):
 				printf("%-15s:%19s,%3d,%3d\n", yytext, tokenType[tn-1], line, pos);
-				// line += calcNL_comment(yytext);
 				int lines = 0;
 				int tmp = 0;
 				while (yytext[tmp] != '\0') {
@@ -177,20 +177,4 @@ void calcASCII(char* x) {
 	}
 	yylval.iVal = '\'';
 	return;
-}
-
-int calcNL_comment(char* x) {
-	// int lines = 0;
-	// int tmp = 0;
-	// if (x[1] != '*') {
-	// 	while (x[tmp] != '\0') {
-	// 		if (x[tmp] == '\n') {
-	// 			lines++;
-	// 		}
-	// 		tmp++;
-	// 	}
-	// 	return lines;
-	// }
-	// pos = 1;
-	// return 1;
 }
