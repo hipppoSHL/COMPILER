@@ -116,12 +116,12 @@ void calcDecimal(char* x) {
 		yylval.iVal = 0;
 		return;
 	}
-	if (x[0] == '0') {
-		yylval.iVal = strtoul(x, NULL, 8);
+	if (x[1] == 'x' || x[1] == 'X') {
+		yylval.iVal = strtoul(x, NULL, 16);
 		return;
 	}
-	if (x[0] == 'x' || x[0] == 'X') {
-		yylval.iVal = strtoul(x, NULL, 16);
+	if (x[0] == '0') {
+		yylval.iVal = strtoul(x, NULL, 8);
 		return;
 	}
 	else {

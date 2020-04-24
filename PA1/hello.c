@@ -11,6 +11,8 @@ int main(void){
 	// this is a comment2
 	int a;
 	printf("Hello World!\n");
+	int a = 0x11;
+	int b = 017;
 	return 0;
 }
 
