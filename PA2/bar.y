@@ -13,23 +13,24 @@ int yyerror(char*);
 
 %token <iVal> INTEGER CHAR
 %token <rVal> REAL
-%token <sVal> COMMENT ID STRING OPERATOR EQUAL ADD 
-%token break case char default else float for if int return switch void while int float double char void ASGN ADD_ASGN SUB_ASGN MUL_ASGN DIV_ASGN MOD_ASGN EQ_CMP EQ_NOT EQ_BIG EQ_LES LSHIFT RSHIFT AND OR INCREMENT DECREMENT ADD SUB MUL DIV MOD LESS BIGG
+%token <sVal> ID STRING OPERATOR
+%token BREAK CASE CHAR_K DEFAULT ELSE FLOAT FOR IF RETURN SWITCH VOID WHILE INT DOUBLE ASGN ADD_ASGN SUB_ASGN MUL_ASGN DIV_ASGN MOD_ASGN EQ_CMP EQ_NOT EQ_LES EQ_BIG LSHIFT RSHIFT AND OR INCREMENT DECREMENT ADD SUB MUL DIV MOD LESS BIGG
 
 %%
-Program: DeclarionList { printf("Program -> DeclarionList\n"); }
+Program: DeclarationList { printf("Program -> DeclarationList\n"); }
 	   ;
-DeclarionList: DeclarionList Declaration { printf("DeclarationList -> DeclarationList Declaration\n"); }
+DeclarationList: DeclarationList Declaration { printf("DeclarationList -> DeclarationList Declaration\n"); }
 		     | Declaration { printf("DeclarationList -> Declaration\n"); }
 			 ;
-Declaration: VarDeclaration { printf("Declaration -> VarDeclaration\n";) }
+Declaration: VarDeclaration { printf("Declaration -> VarDeclaration\n"); }
 		   | FuncDeclaration { printf("Declaration -> FuncDeclaration\n"); }
 		   ;
-FuncDeclaration: Type ID '(' Params ')' CompoundStmt { printf("FuncDeclaration -> Type $2 ( Params ) CompoundStmt\n"); }
-			   | Type ID '(' Params ')' ';' { printf("FuncDeclaration -> Type $2 ( Params ) ;\n"); }
+
+FuncDeclaration: Type ID '(' Params ')' CompoundStmt { printf("FuncDeclaration -> Type %s ( Params ) CompoundStmt\n", $2);free($2); }
+			   | Type ID '(' Params ')' ';' { printf("FuncDeclaration -> Type %s ( Params ) ;\n", $2); free($2);}
 			   ;
 Params: ParamList { printf("Params -> ParamList\n"); }
-	  | void { printf("Params -> void\n"); }
+	  | VOID { printf("Params -> void\n"); }
 	  | { printf("Params -> Empty\n"); }
 	  ;
 ParamList: ParamList ',' Param { printf("ParamList -> ParamList , Param\n"); }
@@ -44,16 +45,16 @@ LocalDeclarationList: LocalDeclarationList VarDeclaration { printf("LocalDeclara
 					;
 VarDeclaration: Type IDs ';' { printf("VarDeclaration -> Type IDs ;\n"); }
 			  ;
-Type: int	{ printf("Type -> int\n"); }
-	| void 	{ printf("Type -> void\n"); }
-	| char	{ printf("Type -> char\n"); }
-	| float	{ printf("Type -> float\n"); }
+Type: INT	{ printf("Type -> int\n"); }
+	| VOID 	{ printf("Type -> void\n"); }
+	| CHAR_K	{ printf("Type -> char\n"); }
+	| FLOAT	{ printf("Type -> float\n"); }
 	;
 IDs: IDs ',' Value	{ printf("IDs -> IDs , Value\n"); }
    | Value			{ printf("IDs -> Value\n"); }
    ;
-Value: ID '[' INTEGER ']'	{ printf("Value -> $1 [ $3 ]\n"); }
-	 | ID 					{ printf("Value -> $1\n"); }
+Value: ID '[' INTEGER ']'	{ printf("Value -> %s [ %d ]\n", $1, $3); free($1);}
+	 | ID 					{ printf("Value -> %s\n", $1); free($1); }
 	 ;
 StmtList: StmtList Stmt	{ printf("StmtList -> StmtList Stmt\n"); }
 		| { printf("StmtList -> Empty\n"); }
@@ -68,23 +69,23 @@ MatchedStmt: ExprStmt		{ printf("MatchedStmt -> ExprStmt\n"); }
 		   | CompoundStmt	{ printf("MatchedStmt -> CompoundStmt\n"); }
 		   | BreakStmt		{ printf("MatchedStmt -> BreakStmt\n"); }
 		   | SwitchStmt		{ printf("MatchedStmt -> SwitchStmt\n"); }
-		   | if '(' Expr ')' MatchedStmt else MatchedStmt { printf("MatchedStmt -> if ( Expr ) MatchedStmt else MatchedStmt\n"); }
+		   | IF '(' Expr ')' MatchedStmt ELSE MatchedStmt { printf("MatchedStmt -> if ( Expr ) MatchedStmt else MatchedStmt\n"); }
 		   ;
-OpenStmt: if '(' Expr ')' Stmt	{ printf("OpenStmt -> if ( Expr ) Stmt\n"); }
-		| if '(' Expr ')' MatchedStmt else OpenStmt	{ printf("OpenStmt -> if ( Expr ) MatchedStmt else OpenStmt\n"); }
+OpenStmt: IF '(' Expr ')' Stmt	{ printf("OpenStmt -> if ( Expr ) Stmt\n"); }
+		| IF '(' Expr ')' MatchedStmt ELSE OpenStmt	{ printf("OpenStmt -> if ( Expr ) MatchedStmt else OpenStmt\n"); }
 		;
-SwitchStmt: switch '(' Expr ')' '{' CaseList DefaultCase '}'	{ printf("SwitchStmt -> switch ( Expr ) { CaseList DefaultCase }\n"); }
+SwitchStmt: SWITCH '(' Expr ')' '{' CaseList DefaultCase '}'	{ printf("SwitchStmt -> switch ( Expr ) { CaseList DefaultCase }\n"); }
 		  ;
-CaseList: CaseList case INTEGER ':' StmtList	{ printf("CaseList -> CaseList case $3 : StmtList\n";) }
-		| case INTEGER ':' StmtList	{ printf("CaseList -> case $2 : StmtList\n"); }
+CaseList: CaseList CASE INTEGER ':' StmtList	{ printf("CaseList -> CaseList case %d : StmtList\n", $3); }
+		| CASE INTEGER ':' StmtList	{ printf("CaseList -> case %d : StmtList\n", $2); }
 		;
-DefaultCase: default ':' StmtList	{ printf("DefaultCase -> default : StmtList\n"); }
+DefaultCase: DEFAULT ':' StmtList	{ printf("DefaultCase -> default : StmtList\n"); }
 		   | { printf("DefaultCase -> Empty\n"); }
 		   ;
-ReturnStmt: return Expr ';'	{ printf("ReturnStmt -> return Expr ;\n"); }
-		  | return ';'	{ printf("ReturnStmt -> return ;\n"); }
+ReturnStmt: RETURN Expr ';'	{ printf("ReturnStmt -> return Expr ;\n"); }
+		  | RETURN ';'	{ printf("ReturnStmt -> return ;\n"); }
 		  ;
-BreakStmt: break ';'	{ printf("BreakStmt -> break ;\n"); }
+BreakStmt: BREAK ';'	{ printf("BreakStmt -> break ;\n"); }
 		 ;
 ExprStmt: Expr ';'	{ printf("ExprStmt -> Expr ;\n"); }
 		| ';'		{ printf("ExprStmt -> ;\n"); }
@@ -99,8 +100,8 @@ AssignExpr: Variable ASGN Expr		{ printf("AssignExpr -> Variable = Expr\n"); }
 		  | Variable DIV_ASGN Expr	{ printf("AssignExpr -> Variable /= Expr\n"); }
 		  | Variable MOD_ASGN Expr	{ printf("AssignExpr -> Variable %%= Expr\n"); }
 		  ;
-Variable: ID '[' Expr ']'	{ printf("Variable -> $1 [ Expr ]\n"); }
-		| ID	{ printf("Variable -> $1 [ Expr ]\n"); }
+Variable: ID '[' Expr ']'	{ printf("Variable -> %s [ Expr ]\n", $1);free($1); }
+		| ID	{ printf("Variable -> %s [ Expr ]\n", $1); free($1);}
 		;
 SimpleExpr: SimpleExpr OR AndExpr	{ printf("SimpleExpr -> SimpleExpr || AndExpr\n"); }
 	      | AndExpr	{ printf("SimpleExpr -> AndExpr\n"); }
@@ -122,8 +123,8 @@ AddExpr: AddExpr ADD Term	{ printf("AddExpr -> AddExpr + Term\n"); }
 	   ;
 Term: Term MUL Factor	{ printf("Term -> Term * Factor\n"); }
 	| Term DIV Factor	{ printf("Term -> Term / Factor\n"); }
-	| Term MOD Factor	{ printf("Term -> Term % Factor\n"); }
-	| Term				{ printf("Term -> Term\n"); }
+	| Term MOD Factor	{ printf("Term -> Term %% Factor\n"); }
+	| Factor			{ printf("Term -> Factor\n"); }
 	;
 Factor: '(' Expr ')'		{ printf("Factor -> ( Expr )\n"); }
 	  | FunctionCall		{ printf("Factor -> FunctionCall\n"); }
@@ -133,26 +134,27 @@ Factor: '(' Expr ')'		{ printf("Factor -> ( Expr )\n"); }
 	  | IncDec Variable		{ printf("Factor -> IncDec Variable\n"); }
 	  | NumberLiteral		{ printf("Factor -> NumberLiteral\n"); }
 	  ;
-NumberLiteral: INTEGER	{ printf("NumberLiteral -> $1\n"); }
-			 | REAL		{ printf("NumberLiteral -> $1\n"); }
+NumberLiteral: INTEGER	{ printf("NumberLiteral -> %d\n", $1); }
+			 | REAL		{ printf("NumberLiteral -> %f\n", $1); }
 			 ;
 IncDec: INCREMENT	{ printf("IncDec -> ++\n"); }
 	  | DECREMENT	{ printf("IncDec -> --\n"); }
 	  ;
-WhileStmt: while '(' Expr ')' CompoundStmt	{ printf("WhileStmt -> while ( Expr ) CompoundStmt\n"); }
-		 | while '(' Expr ')' ';'	{ printf("WhileStmt -> while ( Expr ) ;\n"); }
+WhileStmt: WHILE '(' Expr ')' CompoundStmt	{ printf("WhileStmt -> while ( Expr ) CompoundStmt\n"); }
+		 | WHILE '(' Expr ')' ';'	{ printf("WhileStmt -> while ( Expr ) ;\n"); }
 		 ;
-ForStmt: for '(' Expr ';' Expr ';' Expr ')' CompoundStmt	{ printf("ForStmt -> for ( Expr ; Expr ; Expr ) CompoundStmt\n"); }
-	   | for '(' Expr ';' Expr ';' Expr ')' ';'	{ printf("ForStmt -> for ( Expr ; Expr ; Expr ) ;\n"); }
+ForStmt: FOR '(' Expr ';' Expr ';' Expr ')' CompoundStmt	{ printf("ForStmt -> for ( Expr ; Expr ; Expr ) CompoundStmt\n"); }
+	   | FOR '(' Expr ';' Expr ';' Expr ')' ';'	{ printf("ForStmt -> for ( Expr ; Expr ; Expr ) ;\n"); }
 	   ;
-FunctionCall: ID '(' Arguments ')'	{ printf("FunctionCall -> $1 ( Arguments )\n"); }
+FunctionCall: ID '(' Arguments ')'	{ printf("FunctionCall -> %s ( Arguments )\n", $1); free($1);}
 		    ;
 Arguments: ArgumentList	{ printf("Arguments -> ArgumentList\n"); }
-	     ;
+	     | { printf("Arguments -> Empty\n"); }
+		 ;
 ArgumentList: ArgumentList ',' Expr	{ printf("ArgumentList -> ArgumentList , Expr\n"); }
-		    | ArgumentList ',' STRING	{ printf("ArgumentList -> ArgumentList , $3\n"); }
+		    | ArgumentList ',' STRING	{ printf("ArgumentList -> ArgumentList , %s\n", $3); free($3);}
 			| Expr	{ printf("ArgumentList -> Expr\n"); }
-			| STRING	{ printf("ArgumentList -> $1\n"); }
+			| STRING	{ printf("ArgumentList -> %s\n", $1); free($1); }
 
 %%
 int main(int argc, char *argv[]){
