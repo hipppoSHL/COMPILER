@@ -42,7 +42,7 @@ MOD				%
 LESS			<
 BIGG			>
 
-PUNC			\(|\)|\{|\}|\[|\]|;|:|\.
+PUNC			\(|\)|\{|\}|\[|\]|;|:|\.|,
 
 BREAK			break
 CASE			case
@@ -63,7 +63,7 @@ DOUBLE			double
 {WS}		{}
 {BREAK}		{return BREAK;}
 {CASE}		{return CASE;}
-{CHAR_K}	{return CHAR;}
+{CHAR_K}	{return CHAR_K;}
 {DEFAULT}	{return DEFAULT;}
 {ELSE}		{return ELSE;}
 {FLOAT}		{return FLOAT;}
