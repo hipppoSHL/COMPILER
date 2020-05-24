@@ -5,6 +5,9 @@
 STACK *stack;
 int yylex(void);
 int yyerror(char*);
+void dfs(ASTNode *node);
+int check;
+int isSyntaxError;
 %}
 
 %union{
@@ -212,7 +215,6 @@ ReturnStmt: RETURN Expr ';'	{
 		  }
 		  ;
 BreakStmt: BREAK ';'	{
-			// 이상함... 
 			push(stack, makeASTNode(_BRKSTMT, NO_TYPE));
 		 }
 		 ;
@@ -413,20 +415,55 @@ Arguments: ArgumentList	{
 ArgumentList: ArgumentList ',' Expr	{
 				ASTNode *expr = pop(stack);
 				ASTNode *arglist = pop(stack);
-				// 아리까리함...
 				push(stack, setLastSibling(arglist, expr));
 			}
 			| Expr	{}
 			
 
 %%
+void dfs(ASTNode *node) {
+	int node_type = getTkNum(node);
+	int check2 = 0;
+	if (node_type == _FORSTMT || node_type == _WHLSTMT || node_type == _SWSTMT) {
+		check++;
+		check2 = 1;
+	} 
+	
+	if (node_type == _BRKSTMT) {
+		if (check != 1) {
+			isSyntaxError = 1;
+			return;
+		}
+	}
+	
+	ASTNode *child = getChild(node);
+	while (child != 0) {
+		dfs(child);
+		child = getSibling(child);
+	}
+	if (check2 == 1) check--;
+	ASTNode *sibling = getSibling(node);
+	while (sibling != 0) {
+		dfs(sibling);
+		sibling = getSibling(sibling);
+	}
+	return;
+}
+
 int main(int argc, char *argv[]){
 	extern FILE *yyin;
 	stack = initStack();
+	check = 0;
+	isSyntaxError = 0;
 	yyin = fopen(argv[1], "r");
 	yyparse();
 	fclose(yyin);
-	printAST(pop(stack));
+	ASTNode *tmp = pop(stack);
+	printAST(tmp);
+	dfs(tmp);
+	if (isSyntaxError == 1) {
+		printf("Syntax Error\n");
+	}
 	return 0;
 }
 
