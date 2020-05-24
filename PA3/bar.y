@@ -39,7 +39,7 @@ Declaration: VarDeclaration {}
 		   | FuncDeclaration {}
 		   ;
 
-FuncDeclaration: Type FuncID '(' Params ')' CompoundStmt {
+FuncDeclaration: TypeSpecifier FuncID '(' Params ')' CompoundStmt {
 	ASTNode *cpdstmt = pop(stack);
 	ASTNode *params = pop(stack);
 	ASTNode *funcid = pop(stack);
@@ -47,7 +47,7 @@ FuncDeclaration: Type FuncID '(' Params ')' CompoundStmt {
 	funcdec = setChild(funcdec, setSibling(pop(stack), setSibling(funcid, setSibling(params, cpdstmt))));
 	push(stack, funcdec);
 }
-| Type FuncID '(' Params ')' ';' {
+| TypeSpecifier FuncID '(' Params ')' ';' {
 	ASTNode *funcdec = makeASTNode(_FUNCDEC, NO_TYPE);
 	ASTNode *params = pop(stack);
 	ASTNode *funcid = pop(stack);
@@ -79,7 +79,7 @@ ParamList: ParamList ',' Param {
  		 }
 		 | Param {}
 		 ;
-Param: Type Value {
+Param: TypeSpecifier Value {
 	   ASTNode *param = makeASTNode(_PARAM, NO_TYPE);
 	   ASTNode *value = pop(stack);
 	   ASTNode *type = pop(stack);
@@ -105,14 +105,14 @@ LocalDeclarationList: LocalDeclarationList VarDeclaration {
 					}
 					| { push(stack, makeASTNode(_LDECLIST, NO_TYPE)); }
 					;
-VarDeclaration: Type IDs ';' {
+VarDeclaration: TypeSpecifier IDs ';' {
 				ASTNode *vardec = makeASTNode(_VARDEC, NO_TYPE);
 			  	ASTNode *ids = pop(stack);
 				ASTNode *type = pop(stack);
 				push(stack, setChild(vardec, setSibling(type, ids)));
 			  }
 			  ;
-Type: INT	{ push(stack, makeASTNode(_TYPE, TYPE_INT)); }
+TypeSpecifier: INT	{ push(stack, makeASTNode(_TYPE, TYPE_INT)); }
 	| VOID 	{ push(stack, makeASTNode(_TYPE, TYPE_VOID)); }
 	| CHAR_K	{ push(stack, makeASTNode(_TYPE, TYPE_INT)); }
 	| FLOAT	{ push(stack, makeASTNode(_TYPE, TYPE_FLOAT)); }
