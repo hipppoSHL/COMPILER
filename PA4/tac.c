@@ -9,9 +9,30 @@ void travelNodes(ASTNode *node, SYMTAB *table){
 	TKNUM tn = getTkNum(node);
 	switch(tn){
 		case _PROG:
+			printf("_PROG\n");
 			break;
 		case _VARDEC:
+		{
+			// VarDeclaration: TypeSpecifier IDs ';'
+			// IDs: IDs ',' Value | Value
+			// Value: ID '[' INTEGER ']' | ID
+			ASTNode *typenode = getChild(node);
+			ASTNode *idsnode = getSibling(typenode);
+			do {
+				// 만약 배열 타입 아닐 때
+				if (getTkNum(idsnode) == _ID) {
+					ASTNode *valuenode = idsnode;
+					char* var_id = getSVal(valuenode);
+					addSym(table, var_id, getType(typenode));
+				} else { // 만약 배열 타입일 때
+					int var_arr_num = getIVal(getSibling(getChild(idsnode)));
+					char* var_id = getSVal(getChild(idsnode));
+					int var_arr_type = getType(typenode) + 1;
+					addSymArray(table, var_id, var_arr_type, var_arr_num);
+				}
+			} while (idsnode = getSibling(idsnode));
 			break;
+		}
 		case _FUNCDEC:
 			break;
 		case _ID:
@@ -27,7 +48,10 @@ void travelNodes(ASTNode *node, SYMTAB *table){
 		case _PARAM:
 			break;
 		case _CPDSTMT:
+		{
+			pushSymTab(table);
 			break;
+		}
 		case _LDECLIST:
 			break;
 		case _STMTLIST:
@@ -82,7 +106,10 @@ void travelNodes(ASTNode *node, SYMTAB *table){
 		case _PARAM:
 			break;
 		case _CPDSTMT:
+		{
+			popSymTab(table);
 			break;
+		}
 		case _LDECLIST:
 			break;
 		case _STMTLIST:
@@ -118,5 +145,3 @@ void travelNodes(ASTNode *node, SYMTAB *table){
 	}
 	if(getSibling(node))	travelNodes(getSibling(node), table);
 }
-
-
