@@ -39,7 +39,7 @@ Declaration: VarDeclaration {}
 		   | FuncDeclaration {}
 		   ;
 
-FuncDeclaration: TypeSpecifier ID '(' Params ')' CompoundStmt {
+FuncDeclaration: TypeSpecifier FuncID '(' Params ')' CompoundStmt {
 	ASTNode *cpdstmt = pop(stack);
 	ASTNode *params = pop(stack);
 	ASTNode *funcid = pop(stack);
@@ -47,7 +47,19 @@ FuncDeclaration: TypeSpecifier ID '(' Params ')' CompoundStmt {
 	funcdec = setChild(funcdec, setSibling(pop(stack), setSibling(funcid, setSibling(params, cpdstmt))));
 	push(stack, funcdec);
 }
+| TypeSpecifier FuncID '(' Params ')' ';' {
+	ASTNode *funcdec = makeASTNode(_FUNCDEC, NO_TYPE);
+	ASTNode *params = pop(stack);
+	ASTNode *funcid = pop(stack);
+	funcdec = setChild(funcdec, setSibling(setSibling(pop(stack), funcid), params));
+	push(stack, funcdec);
+}
 ;
+
+FuncID: ID {
+		push(stack, makeASTNodeID($1, NO_TYPE)); 
+	}
+	;
 
 Params: ParamList { 
 		ASTNode *params = makeASTNode(_PARAMS, NO_TYPE);
@@ -170,7 +182,9 @@ SwitchStmt: SWITCH '(' Expr ')' '{' CaseList DefaultCase '}' {
 		    ASTNode *swstmt = makeASTNode(_SWSTMT, NO_TYPE);
 			ASTNode *defaultcase = pop(stack);
 			ASTNode *caselist = pop(stack);
-			ASTNode *expr = setSibling(pop(stack), setSibling(caselist, defaultcase));
+			ASTNode *expr = pop(stack);
+			setSibling(expr, caselist);
+			setLastSibling(caselist, defaultcase);
 			push(stack, setChild(swstmt, expr));
 		  }
 		  ;
@@ -440,23 +454,18 @@ void dfs(ASTNode *node) {
 
 int main(int argc, char *argv[]){
 	extern FILE *yyin;
+	extern FILE *yyout;
+	ASTNode *root = 0;
 	stack = initStack();
 
-	ASTNode *root = 0;
-
-	check = 0;
-	isSyntaxError = 0;
 	yyin = fopen(argv[1], "r");
 	yyparse();
 	fclose(yyin);
-	// ASTNode *tmp = pop(stack);
-	// printAST(tmp);
-	// dfs(tmp);
-	// if (isSyntaxError == 1) {
-	// 	printf("Syntax Error\n");
-	// }
-	// push(stack, tmp);
-	buildTAC(root = pop(stack));
+
+	root = pop(stack);
+	yyout = fopen(genOutputFN(argv[1]), "w");
+	buildTAC(root);
+	fclose(yyout);
 	return 0;
 }
 
